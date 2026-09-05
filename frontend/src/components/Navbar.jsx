@@ -10,7 +10,16 @@ export default function Navbar({
   activeTab,
   setActiveTab,
 }) {
-  const isSepolia = chainId === '0xaa36a7' || chainId === 11155111 || chainId === '11155111';
+  let isSepolia = false;
+  if (chainId != null) {
+    try {
+      isSepolia = BigInt(chainId) === 11155111n;
+    } catch {
+      const str = String(chainId).toLowerCase();
+      isSepolia = str === '0xaa36a7' || str === '11155111';
+    }
+  }
+
 
   const formatAddress = (addr) => {
     if (!addr) return '';
