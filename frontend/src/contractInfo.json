@@ -1,0 +1,420 @@
+{
+  "address": "0xD418df8771302752E4b9a658AafC962Eca54198c",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "ReentrancyGuardReentrantCall",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "jobId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "milestoneIndex",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "raisedBy",
+          "type": "address"
+        }
+      ],
+      "name": "DisputeRaised",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "jobId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "milestoneIndex",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "bool",
+          "name": "paidToFreelancer",
+          "type": "bool"
+        }
+      ],
+      "name": "DisputeResolved",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "jobId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "client",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "freelancer",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "arbitrator",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "totalAmount",
+          "type": "uint256"
+        }
+      ],
+      "name": "JobCreated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "jobId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "milestoneIndex",
+          "type": "uint256"
+        }
+      ],
+      "name": "MilestoneApproved",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "jobId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "milestoneIndex",
+          "type": "uint256"
+        }
+      ],
+      "name": "MilestoneDelivered",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "jobId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "milestoneIndex",
+          "type": "uint256"
+        }
+      ],
+      "name": "approveMilestone",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "freelancer",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "arbitrator",
+          "type": "address"
+        },
+        {
+          "internalType": "string[]",
+          "name": "milestoneDescriptions",
+          "type": "string[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "milestoneAmounts",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "createJob",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "jobId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getJob",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "jobId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "address",
+              "name": "client",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "freelancer",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "arbitrator",
+              "type": "address"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "string",
+                  "name": "description",
+                  "type": "string"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "amount",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "enum Escrow.MilestoneStatus",
+                  "name": "status",
+                  "type": "uint8"
+                }
+              ],
+              "internalType": "struct Escrow.Milestone[]",
+              "name": "milestones",
+              "type": "tuple[]"
+            },
+            {
+              "internalType": "bool",
+              "name": "exists",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct Escrow.Job",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getJobCount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "jobId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "milestoneIndex",
+          "type": "uint256"
+        }
+      ],
+      "name": "getMilestone",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "string",
+              "name": "description",
+              "type": "string"
+            },
+            {
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "enum Escrow.MilestoneStatus",
+              "name": "status",
+              "type": "uint8"
+            }
+          ],
+          "internalType": "struct Escrow.Milestone",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "jobs",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "jobId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "client",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "freelancer",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "arbitrator",
+          "type": "address"
+        },
+        {
+          "internalType": "bool",
+          "name": "exists",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "jobId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "milestoneIndex",
+          "type": "uint256"
+        }
+      ],
+      "name": "markDelivered",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "nextJobId",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "jobId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "milestoneIndex",
+          "type": "uint256"
+        }
+      ],
+      "name": "raiseDispute",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "jobId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "milestoneIndex",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bool",
+          "name": "payFreelancer",
+          "type": "bool"
+        }
+      ],
+      "name": "resolveDispute",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ]
+}
