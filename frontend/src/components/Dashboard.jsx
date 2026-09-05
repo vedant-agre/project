@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { formatEther } from 'ethers';
 
-export default function Dashboard({ account, contract, onSelectJob, onCreateJobClick }) {
+export default function Dashboard({ account, contract, onSelectJob, onCreateJobClick, onUserRolesFetched }) {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -10,6 +10,7 @@ export default function Dashboard({ account, contract, onSelectJob, onCreateJobC
     if (!contract || !account) {
       setJobs([]);
       setLoading(false);
+      if (onUserRolesFetched) onUserRolesFetched([]);
       return;
     }
 
@@ -27,6 +28,7 @@ export default function Dashboard({ account, contract, onSelectJob, onCreateJobC
        * should be used to query jobs filtered by participant address efficiently.
        */
       const userJobs = [];
+      const globalRolesSet = new Set();
 
       for (let i = 0; i < count; i++) {
         try {
@@ -42,21 +44,18 @@ export default function Dashboard({ account, contract, onSelectJob, onCreateJobC
           const isArbitrator = arbitrator.toLowerCase() === accLower;
 
           if (isClient || isFreelancer || isArbitrator) {
-            // Determine user roles for this job
             const roles = [];
-            if (isClient) roles.push('Client');
-            if (isFreelancer) roles.push('Freelancer');
-            if (isArbitrator) roles.push('Arbitrator');
+            if (isClient) { roles.push('Client'); globalRolesSet.add('Client'); }
+            if (isFreelancer) { roles.push('Freelancer'); globalRolesSet.add('Freelancer'); }
+            if (isArbitrator) { roles.push('Arbitrator'); globalRolesSet.add('Arbitrator'); }
 
-            // Format milestones
             const milestones = rawJob.milestones.map((m) => ({
               description: m.description,
               amount: m.amount,
               status: Number(m.status),
             }));
 
-            // Count approved milestones
-            const approvedCount = milestones.filter((m) => m.status === 2 || m.status === 4).length; // Approved or Resolved
+            const approvedCount = milestones.filter((m) => m.status === 2 || m.status === 4).length;
             const totalAmountWei = milestones.reduce((sum, m) => sum + BigInt(m.amount), 0n);
 
             userJobs.push({
@@ -76,7 +75,10 @@ export default function Dashboard({ account, contract, onSelectJob, onCreateJobC
         }
       }
 
-      setJobs(userJobs.reverse()); // Show newest jobs first
+      setJobs(userJobs.reverse());
+      if (onUserRolesFetched) {
+        onUserRolesFetched(Array.from(globalRolesSet));
+      }
     } catch (err) {
       console.error('Error fetching jobs:', err);
       setError('Failed to load jobs from smart contract.');
@@ -131,7 +133,7 @@ export default function Dashboard({ account, contract, onSelectJob, onCreateJobC
         <div>
           <h2 className="text-xl font-bold text-slate-100">My Escrow Jobs</h2>
           <p className="text-xs text-slate-400 mt-0.5">
-            Jobs where your address is involved as Client, Freelancer, or Arbitrator.
+            Jobs where your connected wallet is involved as Client, Freelancer, or Arbitrator.
           </p>
         </div>
         <button
@@ -151,9 +153,9 @@ export default function Dashboard({ account, contract, onSelectJob, onCreateJobC
       {jobs.length === 0 ? (
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-12 text-center space-y-4">
           <div className="text-4xl">📋</div>
-          <h3 className="text-base font-bold text-slate-200">No jobs yet</h3>
+          <h3 className="text-base font-bold text-slate-200">No jobs found for this account</h3>
           <p className="text-xs text-slate-400 max-w-sm mx-auto">
-            You don't have any active escrow jobs linked to your wallet address. Create one to get started!
+            You don't have any escrow jobs linked to this address. Create a job or switch accounts in MetaMask to view other roles.
           </p>
           <div>
             <button
@@ -179,15 +181,15 @@ export default function Dashboard({ account, contract, onSelectJob, onCreateJobC
                     {job.roles.map((r) => (
                       <span
                         key={r}
-                        className={`text-[10px] px-2 py-0.5 rounded-full font-medium border ${
+                        className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${
                           r === 'Client'
-                            ? 'bg-blue-500/10 text-blue-400 border-blue-500/30'
+                            ? 'bg-blue-500/15 text-blue-400 border-blue-500/30'
                             : r === 'Freelancer'
-                            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                            : 'bg-purple-500/10 text-purple-400 border-purple-500/30'
+                            ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+                            : 'bg-purple-500/15 text-purple-400 border-purple-500/30'
                         }`}
                       >
-                        {r}
+                        Your Role: {r}
                       </span>
                     ))}
                   </div>
