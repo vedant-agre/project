@@ -7,7 +7,6 @@ import JobDetail from './components/JobDetail';
 import contractInfo from './contractInfo.json';
 
 const SEPOLIA_CHAIN_ID_HEX = '0xaa36a7';
-const SEPOLIA_CHAIN_ID_DEC = 11155111;
 
 export default function App() {
   const [account, setAccount] = useState('');
@@ -16,6 +15,7 @@ export default function App() {
   const [isConnecting, setIsConnecting] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedJobId, setSelectedJobId] = useState(null);
+  const [userRoles, setUserRoles] = useState([]);
 
   const initEthers = async () => {
     if (!window.ethereum) return;
@@ -23,8 +23,7 @@ export default function App() {
       const provider = new BrowserProvider(window.ethereum);
       const accounts = await provider.send('eth_accounts', []);
       const network = await provider.getNetwork();
-      const currentChainId = network.chainId;
-      setChainId(currentChainId);
+      setChainId(network.chainId);
 
       if (accounts && accounts.length > 0) {
         const userAddr = accounts[0];
@@ -67,6 +66,7 @@ export default function App() {
   const disconnectWallet = () => {
     setAccount('');
     setContract(null);
+    setUserRoles([]);
   };
 
   const switchToSepolia = async () => {
@@ -77,7 +77,6 @@ export default function App() {
         params: [{ chainId: SEPOLIA_CHAIN_ID_HEX }],
       });
     } catch (switchError) {
-      // Error code 4902 means the chain has not been added to MetaMask.
       if (switchError.code === 4902) {
         try {
           await window.ethereum.request({
@@ -108,10 +107,12 @@ export default function App() {
       const handleAccountsChanged = (accounts) => {
         if (accounts.length > 0) {
           setAccount(accounts[0]);
+          setUserRoles([]);
           initEthers();
         } else {
           setAccount('');
           setContract(null);
+          setUserRoles([]);
         }
       };
 
@@ -145,6 +146,7 @@ export default function App() {
           setActiveTab(tab);
           setSelectedJobId(null);
         }}
+        userRoles={userRoles}
       />
 
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-8">
@@ -160,7 +162,7 @@ export default function App() {
             account={account}
             contract={contract}
             onSuccess={() => {
-              // Stay on form or switch to dashboard
+              setActiveTab('dashboard');
             }}
           />
         ) : (
@@ -169,6 +171,7 @@ export default function App() {
             contract={contract}
             onSelectJob={(id) => setSelectedJobId(id)}
             onCreateJobClick={() => setActiveTab('create')}
+            onUserRolesFetched={(roles) => setUserRoles(roles)}
           />
         )}
       </main>

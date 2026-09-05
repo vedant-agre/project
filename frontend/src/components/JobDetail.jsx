@@ -12,7 +12,7 @@ const STATUS_LABELS = {
 export default function JobDetail({ jobId, account, contract, onBack }) {
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [actionLoading, setActionLoading] = useState({}); // { 'milestoneIndex-action': boolean }
+  const [actionLoading, setActionLoading] = useState({});
   const [error, setError] = useState('');
   const [txSuccessMsg, setTxSuccessMsg] = useState('');
 
@@ -77,7 +77,7 @@ export default function JobDetail({ jobId, account, contract, onBack }) {
 
       await tx.wait();
       setTxSuccessMsg(`Action "${actionType}" confirmed on Sepolia!`);
-      await fetchJobDetail(); // Auto-refresh job status after transaction confirmation
+      await fetchJobDetail();
     } catch (err) {
       console.error(`Error executing ${actionType}:`, err);
       const msg = err.reason || err.message || 'Transaction failed or was rejected.';
@@ -109,6 +109,7 @@ export default function JobDetail({ jobId, account, contract, onBack }) {
   const isClient = job.client.toLowerCase() === accLower;
   const isFreelancer = job.freelancer.toLowerCase() === accLower;
   const isArbitrator = job.arbitrator.toLowerCase() === accLower;
+  const isParticipant = isClient || isFreelancer || isArbitrator;
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
@@ -142,44 +143,80 @@ export default function JobDetail({ jobId, account, contract, onBack }) {
         </div>
       )}
 
+      {/* NON-PARTICIPANT WARNING BANNER */}
+      {!isParticipant && account && (
+        <div className="bg-amber-500/15 border border-amber-500/30 rounded-xl p-4 text-xs text-amber-300 flex items-start space-x-3">
+          <span className="text-base">⚠️</span>
+          <div className="space-y-1">
+            <div className="font-bold text-amber-200">You are not a participant in this job</div>
+            <p className="text-slate-300">
+              Your connected wallet <code className="font-mono text-amber-300">{formatAddress(account)}</code> is neither the Client, Freelancer, nor Arbitrator for Job #{job.jobId}. Action buttons are hidden. To interact with this job, please switch to a participant account in MetaMask.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Main Job Card */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+        {/* Prominent Header Banner */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
           <div>
             <div className="flex items-center space-x-3">
-              <h2 className="text-xl font-bold text-slate-100">Job #{job.jobId}</h2>
-              <span className="font-mono text-xs font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-0.5 rounded-full">
+              <h2 className="text-2xl font-extrabold text-slate-100">Job #{job.jobId}</h2>
+              <span className="font-mono text-xs font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1 rounded-full">
                 {parseFloat(job.totalAmountEth).toFixed(3)} ETH
               </span>
             </div>
-            <p className="text-xs text-slate-400 mt-1">Escrow Job Details & Milestone Management</p>
+            <p className="text-xs text-slate-400 mt-1">Escrow Job Details & Milestone Actions</p>
           </div>
 
+          {/* PROMINENT ROLE BADGES */}
           <div className="flex flex-wrap gap-2 text-xs">
-            {isClient && <span className="bg-blue-500/10 text-blue-400 border border-blue-500/30 px-2.5 py-1 rounded-lg font-semibold">Your Role: Client</span>}
-            {isFreelancer && <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded-lg font-semibold">Your Role: Freelancer</span>}
-            {isArbitrator && <span className="bg-purple-500/10 text-purple-400 border border-purple-500/30 px-2.5 py-1 rounded-lg font-semibold">Your Role: Arbitrator</span>}
-            {!isClient && !isFreelancer && !isArbitrator && <span className="bg-slate-800 text-slate-400 px-2.5 py-1 rounded-lg">Viewer</span>}
+            {isClient && (
+              <div className="bg-blue-500/20 text-blue-300 border-2 border-blue-500/50 px-3.5 py-1.5 rounded-xl font-extrabold text-xs shadow flex items-center space-x-1.5">
+                <span>👤</span>
+                <span>YOUR ROLE: CLIENT</span>
+              </div>
+            )}
+            {isFreelancer && (
+              <div className="bg-emerald-500/20 text-emerald-300 border-2 border-emerald-500/50 px-3.5 py-1.5 rounded-xl font-extrabold text-xs shadow flex items-center space-x-1.5">
+                <span>💻</span>
+                <span>YOUR ROLE: FREELANCER</span>
+              </div>
+            )}
+            {isArbitrator && (
+              <div className="bg-purple-500/20 text-purple-300 border-2 border-purple-500/50 px-3.5 py-1.5 rounded-xl font-extrabold text-xs shadow flex items-center space-x-1.5">
+                <span>⚖️</span>
+                <span>YOUR ROLE: ARBITRATOR</span>
+              </div>
+            )}
+            {!isParticipant && (
+              <div className="bg-slate-800/80 text-slate-400 border border-slate-700 px-3 py-1 rounded-xl text-xs font-medium">
+                Role: Viewer (Non-Participant)
+              </div>
+            )}
           </div>
         </div>
 
         {/* Participant Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div className="bg-slate-950 border border-slate-800 p-3 rounded-xl space-y-1 text-xs">
-            <span className="text-slate-500 text-[10px] uppercase font-bold tracking-wider">Client</span>
-            <div className="font-mono text-slate-200 font-medium truncate" title={job.client}>
+          <div className={`p-3.5 rounded-xl border space-y-1 text-xs ${isClient ? 'bg-blue-950/40 border-blue-500/40' : 'bg-slate-950 border-slate-800'}`}>
+            <span className="text-slate-500 text-[10px] uppercase font-bold tracking-wider">Client (Funder)</span>
+            <div className="font-mono text-slate-200 font-semibold truncate" title={job.client}>
               {formatAddress(job.client)} {isClient && '(You)'}
             </div>
           </div>
-          <div className="bg-slate-950 border border-slate-800 p-3 rounded-xl space-y-1 text-xs">
-            <span className="text-slate-500 text-[10px] uppercase font-bold tracking-wider">Freelancer</span>
-            <div className="font-mono text-slate-200 font-medium truncate" title={job.freelancer}>
+
+          <div className={`p-3.5 rounded-xl border space-y-1 text-xs ${isFreelancer ? 'bg-emerald-950/40 border-emerald-500/40' : 'bg-slate-950 border-slate-800'}`}>
+            <span className="text-slate-500 text-[10px] uppercase font-bold tracking-wider">Freelancer (Deliverer)</span>
+            <div className="font-mono text-slate-200 font-semibold truncate" title={job.freelancer}>
               {formatAddress(job.freelancer)} {isFreelancer && '(You)'}
             </div>
           </div>
-          <div className="bg-slate-950 border border-slate-800 p-3 rounded-xl space-y-1 text-xs">
-            <span className="text-slate-500 text-[10px] uppercase font-bold tracking-wider">Arbitrator</span>
-            <div className="font-mono text-slate-200 font-medium truncate" title={job.arbitrator}>
+
+          <div className={`p-3.5 rounded-xl border space-y-1 text-xs ${isArbitrator ? 'bg-purple-950/40 border-purple-500/40' : 'bg-slate-950 border-slate-800'}`}>
+            <span className="text-slate-500 text-[10px] uppercase font-bold tracking-wider">Arbitrator (Resolver)</span>
+            <div className="font-mono text-slate-200 font-semibold truncate" title={job.arbitrator}>
               {formatAddress(job.arbitrator)} {isArbitrator && '(You)'}
             </div>
           </div>
@@ -192,12 +229,9 @@ export default function JobDetail({ jobId, account, contract, onBack }) {
           {job.milestones.map((m, idx) => {
             const statusInfo = STATUS_LABELS[m.status] || { label: 'Unknown', bg: 'bg-slate-800', text: 'text-slate-400', border: 'border-slate-700' };
 
-            // Determine available buttons
             const isPending = m.status === 0;
             const isDelivered = m.status === 1;
-            const isApproved = m.status === 2;
             const isDisputed = m.status === 3;
-            const isResolved = m.status === 4;
 
             const canFreelancerDeliver = isFreelancer && isPending;
             const canClientApprove = isClient && isDelivered;
@@ -221,10 +255,9 @@ export default function JobDetail({ jobId, account, contract, onBack }) {
                   </div>
                 </div>
 
-                {/* Actions */}
+                {/* Role-Based Action Buttons */}
                 {(canFreelancerDeliver || canClientApprove || canClientOrFreelancerDispute || canArbitratorResolve) && (
                   <div className="pt-2 flex flex-wrap gap-2 border-t border-slate-900">
-                    {/* Freelancer Mark Delivered */}
                     {canFreelancerDeliver && (
                       <button
                         onClick={() => handleAction(idx, 'markDelivered')}
@@ -235,7 +268,6 @@ export default function JobDetail({ jobId, account, contract, onBack }) {
                       </button>
                     )}
 
-                    {/* Client Approve */}
                     {canClientApprove && (
                       <button
                         onClick={() => handleAction(idx, 'approveMilestone')}
@@ -246,7 +278,6 @@ export default function JobDetail({ jobId, account, contract, onBack }) {
                       </button>
                     )}
 
-                    {/* Client / Freelancer Raise Dispute */}
                     {canClientOrFreelancerDispute && (
                       <button
                         onClick={() => handleAction(idx, 'raiseDispute')}
@@ -257,7 +288,6 @@ export default function JobDetail({ jobId, account, contract, onBack }) {
                       </button>
                     )}
 
-                    {/* Arbitrator Resolve */}
                     {canArbitratorResolve && (
                       <>
                         <button
